@@ -2,21 +2,24 @@
 #include <Robojax_L298N_DC_motor.h>
 // motor 1 settings
 #define CHA 0
-#define ENA 19  // this pin must be PWM enabled pin if Arduino board is used
+#define ENA 19  // this pin must be PWM 
 #define IN1 18
 #define IN2 5
 
 // motor 2 settings
 #define IN3 17
 #define IN4 16
-#define ENB 4  // this pin must be PWM enabled pin if Arduino board is used
+#define ENB 4  // this pin must be PWM 
 #define CHB 1
 
 const int CCW = 2;  // do not change
 const int CW = 1;   // do not change
 
 #define motor1 1  // do not change
-#define Led 2  // do not change
+
+
+#define Switch_one_pin 2  
+#define Switch_two_pin 2  
 
 // for single motor
 //Robojax_L298N_DC_motor motor(IN1, IN2, ENA, CHA, true);
@@ -34,7 +37,7 @@ int motor1Speed = 40;             // variable holding the light output vlaue (in
 const int motor1MinimumSpeed = 20;
 const int motor1MaximumSpeed = 100;
 int motor1StopState = HIGH;  //Stope state of motor (HIGH means STOP) and LOW means Start
-
+bool First_Iteration=true;
 
 int Switch_one = HIGH;  //Stope state of Switch (HIGH means STOP) and LOW means Start
 int Switch_two = HIGH;  //Stope state of Switch (HIGH means STOP) and LOW means Start
@@ -54,10 +57,14 @@ const char *ssid = "POCO X3 NFC";
 const char *password = "abcd1234";
 bool passwordSubmitted = false;
 String submittedPassword; // Variable to store the submitted password
+int count = 0; // Initialize the count variable
+char countinternal[] = "0";
+
 
 WebServer server(80);
 
 const int led = 13;
+
 
 
 void handleFirstPage() {
@@ -155,9 +162,9 @@ void handleRoot() {
   HTML_page.concat(Switch_one_control_p1);
 
     if (Switch_one == HIGH) {
-      HTML_page.concat("<strong>Switch off ");
+      HTML_page.concat("<strong>Refrigerator off");
     } else {
-      HTML_page.concat("<strong>Switch on ");
+      HTML_page.concat("<strong>Refrigerator on");
     }
 
   
@@ -177,9 +184,9 @@ void handleRoot() {
   HTML_page.concat(Switch_two_control_p1);
 
     if (Switch_two == HIGH) {
-      HTML_page.concat("<strong>Switch off ");
+      HTML_page.concat("<strong>Lampshades off ");
     } else {
-      HTML_page.concat("<strong>Switch on ");
+      HTML_page.concat("<strong>Lampshades on ");
     }
 
   
@@ -190,7 +197,27 @@ void handleRoot() {
     HTML_page.concat("m2STOP\">OFF");
   }
   HTML_page.concat(Switch_two_control);
+
   ///Switch_two Ends
+
+//Counter Container start
+  HTML_page.concat(CounterStartContainer);
+
+  //CounterStart
+  HTML_page.concat(Counter);
+  HTML_page.concat("COUNTNOW\">Timer:  ");
+  HTML_page.concat(countinternal);
+  HTML_page.concat(" sec </a>");
+  //CounterEnd
+//ResetCounter Start
+  HTML_page.concat(ResetCounter);
+  HTML_page.concat("RESETCOUNTER\">Reset </a> ");
+//ResetCounter End
+  HTML_page.concat(CounterEndContainer);
+
+ //Counter Container End
+
+  //HTML_page.concat();
 
 
   HTML_page.concat("</body>\n</html>");
@@ -221,6 +248,36 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
   digitalWrite(led, 0);
 }
+
+
+
+hw_timer_t *TIMER0 = NULL;
+void IRAM_ATTR onTimer0(){
+digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
+  Serial.println("Timer Finished");
+  Serial.println(countinternal);
+
+
+  timerDetachInterrupt(TIMER0);
+  timerEnd(TIMER0);
+
+
+}
+
+
+hw_timer_t *TIMER1 = NULL;
+void IRAM_ATTR onTimer1(){
+digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
+  Serial.println("Timer Finished");
+  Serial.println(countinternal);
+
+
+  timerDetachInterrupt(TIMER1);
+  timerEnd(TIMER1);
+
+
+}
+
 
 void setup(void) {
   pinMode (2, OUTPUT);
@@ -266,9 +323,13 @@ void setup(void) {
   server.on("/speed", HTTP_GET, handleMotorSpeed);
   server.on("/direction", HTTP_GET, handleMotorDirection);
   server.on("/stop", HTTP_GET, handleMotorBrake);
+
   server.onNotFound(handleNotFound);
   server.begin();
   Serial.println("HTTP server started");
+
+
+
 }
 
 void loop(void) {
@@ -362,27 +423,47 @@ void handleMotorBrake() {
     Switch_two_OFF_func();
 
   }
+  else if (server.arg("do") ==  "COUNTNOW"){
+    count++;
+    itoa(count, countinternal, 10);
+  }
+
+    else if (server.arg("do") ==  "RESETCOUNTER"){
+    count=0;
+    itoa(count, countinternal, 10);
+  }
   
    else {
 
   }
   handleRoot();
 }  
+
 void Switch_one_ON_func(){
-       digitalWrite(2, HIGH);
+      // digitalWrite(Switch_one_pin, HIGH);
+        //Timer
+      TIMER0 = timerBegin(0, 80, true);
+      timerAttachInterrupt(TIMER0, &onTimer0, true);      
+      timerAlarmWrite(TIMER0, count*1000000, false);
+      timerAlarmEnable(TIMER0); //Just Enable
+
 }
 
 void Switch_one_OFF_func(){
-        digitalWrite(2, LOW);
+        digitalWrite(Switch_one_pin, LOW);
 
 }
 
 
 void Switch_two_ON_func(){
-       digitalWrite(2, HIGH);
+
+      TIMER1 = timerBegin(1, 80, true);
+      timerAttachInterrupt(TIMER1, &onTimer1, true);      
+      timerAlarmWrite(TIMER1, count*1000000, false);
+      timerAlarmEnable(TIMER1); //Just Enable
 }
 
 void Switch_two_OFF_func(){
-        digitalWrite(2, LOW);
+        digitalWrite(Switch_two_pin, LOW);
 
 }

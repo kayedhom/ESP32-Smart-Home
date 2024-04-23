@@ -60,7 +60,7 @@ const char motorControlHeader_1[]  PROGMEM = R"header1(
 .Status_bar {
     text-align: right;
     padding: 10px 20px;
-    color: white;
+    color: #444444;
     float: left;
     background-image: linear-gradient(to right, #fff2cc, #e69138, #f9cb9c); /* Gradient background */
     border-radius: 5px; /* Add rounded corners */
@@ -223,7 +223,7 @@ p {
 
 ////////////////for motor 1 part 1///////////////
 const char motor1Control_p1[] PROGMEM = R"P3(
-<h2>Motor 1 Control</h2>
+<h2>Fan Controller</h2>
 <div class="table">
     <div class="row">
         <div class="fixedCell">
@@ -291,7 +291,7 @@ const char motor1Control_p3[] PROGMEM = R"P5(
 ////////////////for Led part 1///////////////
 const char Switch_one_control_p1[] PROGMEM = R"P3(
 <!-- ---- Led started here ---- -->
-<h2>Devices </h2>
+<h2>Home Devices </h2>
 
 <div class="table-Control">
     <div class="row">
@@ -348,12 +348,36 @@ const char Switch_two_control[] PROGMEM = R"P8(
     </div><!--row - ESP.com -->
 </div><!--table-Control -->
 
-
-
-
-
-
 )P8";
+
+
+const char CounterStartContainer[] PROGMEM = R"P9(            
+<div class="table-Control">
+    <div class="row">
+    
+    )P9";
+
+const char Counter[] PROGMEM = R"P10(            
+<div class="buttonsDiv">
+    <a class="startStop" href="/stop?do=)P10";
+
+
+const char ResetCounter[] PROGMEM = R"P10(            
+<div class="nextprev">
+    <a class="rj-left rj-btn" href="/stop?do=)P10";
+
+
+const char CounterEndContainer[] PROGMEM = R"P11(            
+    </div><!--row - ESP.com -->
+</div><!--table-Control -->
+)P11";
+
+
+
+
+
+
+
 
 
 /*LED2 ENDS*/
