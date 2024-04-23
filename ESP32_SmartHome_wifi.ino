@@ -258,7 +258,6 @@ digitalWrite(Switch_one_pin, !digitalRead(Switch_one_pin));
   Serial.println(countinternal);
 
     Switch_one = HIGH;
-  handleRoot();
 
   timerDetachInterrupt(TIMER0);
   timerEnd(TIMER0);
@@ -274,7 +273,6 @@ digitalWrite(Switch_two_pin, !digitalRead(Switch_two_pin));
   Serial.println(countinternal);
 
     Switch_two = HIGH;
-  handleRoot();
 
   timerDetachInterrupt(TIMER1);
   timerEnd(TIMER1);
