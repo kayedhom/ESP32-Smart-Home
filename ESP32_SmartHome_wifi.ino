@@ -18,8 +18,8 @@ const int CW = 1;   // do not change
 #define motor1 1  // do not change
 
 
-#define Switch_one_pin 2  
-#define Switch_two_pin 2  
+#define Switch_one_pin 21 
+#define Switch_two_pin 22  
 
 // for single motor
 //Robojax_L298N_DC_motor motor(IN1, IN2, ENA, CHA, true);
@@ -253,10 +253,11 @@ void handleNotFound() {
 
 hw_timer_t *TIMER0 = NULL;
 void IRAM_ATTR onTimer0(){
-digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
+digitalWrite(Switch_one_pin, !digitalRead(Switch_one_pin));
   Serial.println("Timer Finished");
   Serial.println(countinternal);
 
+    Switch_one = HIGH;
 
   timerDetachInterrupt(TIMER0);
   timerEnd(TIMER0);
@@ -267,10 +268,11 @@ digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
 
 hw_timer_t *TIMER1 = NULL;
 void IRAM_ATTR onTimer1(){
-digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
+digitalWrite(Switch_two_pin, !digitalRead(Switch_two_pin));
   Serial.println("Timer Finished");
   Serial.println(countinternal);
 
+    Switch_two = HIGH;
 
   timerDetachInterrupt(TIMER1);
   timerEnd(TIMER1);
@@ -281,6 +283,9 @@ digitalWrite(Switch_one_pin, !digitalRead(Switch_two_pin));
 
 void setup(void) {
   pinMode (2, OUTPUT);
+  pinMode (Switch_one_pin, OUTPUT);
+  pinMode (Switch_two_pin, OUTPUT);
+
   Serial.begin(115200);
   motor.begin();
   //L298N DC Motor 
@@ -442,6 +447,8 @@ void handleMotorBrake() {
 void Switch_one_ON_func(){
       // digitalWrite(Switch_one_pin, HIGH);
         //Timer
+      digitalWrite(Switch_one_pin, !digitalRead(Switch_one_pin));
+
       TIMER0 = timerBegin(0, 80, true);
       timerAttachInterrupt(TIMER0, &onTimer0, true);      
       timerAlarmWrite(TIMER0, count*1000000, false);
@@ -456,6 +463,7 @@ void Switch_one_OFF_func(){
 
 
 void Switch_two_ON_func(){
+digitalWrite(Switch_two_pin, !digitalRead(Switch_two_pin));
 
       TIMER1 = timerBegin(1, 80, true);
       timerAttachInterrupt(TIMER1, &onTimer1, true);      
